@@ -12,4 +12,6 @@ public class ProfileInteractionApplication {
 		SpringApplication.run(ProfileInteractionApplication.class, args);
 	}
 
+	
+
 }
