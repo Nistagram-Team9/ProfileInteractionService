@@ -16,7 +16,11 @@
 	<properties>
 		<java.version>1.8</java.version>
 		<app.name>profileInteractionService</app.name>
+		<sonar.projectKey>Nistagram-Team9_ProfileInteractionService</sonar.projectKey>
+  		<sonar.organization>nistagram-team9</sonar.organization>
+  		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 	</properties>
+	
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
