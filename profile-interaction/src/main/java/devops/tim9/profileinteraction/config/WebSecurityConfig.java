@@ -123,35 +123,35 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		return user;
 	}
 	
-
-	@KafkaListener(topics = {"login-events"})
-	public void onMessage(ConsumerRecord<Integer, String> consumerRecord) {
-		System.out.println("Consumer record accepted: " + consumerRecord);
-		System.out.println(consumerRecord);
-		
-		String value = consumerRecord.value();
-		try {
-			LoginEvent loginEvent = objectMapper.readValue(value, LoginEvent.class);
-			System.out.println("login event");
-			System.out.println(loginEvent.toString());
-			JwtAuthenticationRequestToSend request = loginEvent.getAuthenticationRequest();
-			System.out.println("tokennnnn");
-			System.out.println(loginEvent.getAuthenticationRequest());
-			try {
-				this.login(request);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		} catch (JsonMappingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (JsonProcessingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}	
-
-	}
+//
+//	@KafkaListener(topics = {"login-events"})
+//	public void onMessage(ConsumerRecord<Integer, String> consumerRecord) {
+//		System.out.println("Consumer record accepted: " + consumerRecord);
+//		System.out.println(consumerRecord);
+//		
+//		String value = consumerRecord.value();
+//		try {
+//			LoginEvent loginEvent = objectMapper.readValue(value, LoginEvent.class);
+//			System.out.println("login event");
+//			System.out.println(loginEvent.toString());
+//			JwtAuthenticationRequestToSend request = loginEvent.getAuthenticationRequest();
+//			System.out.println("tokennnnn");
+//			System.out.println(loginEvent.getAuthenticationRequest());
+//			try {
+//				this.login(request);
+//			} catch (Exception e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//		} catch (JsonMappingException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (JsonProcessingException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}	
+//
+//	}
 
 
 }
