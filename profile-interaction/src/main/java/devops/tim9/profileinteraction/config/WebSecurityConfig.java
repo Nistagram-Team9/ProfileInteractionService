@@ -1,20 +1,11 @@
 package devops.tim9.profileinteraction.config;
 
-import java.util.ArrayList;
-import java.util.List;
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -23,8 +14,6 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
@@ -33,13 +22,13 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import devops.tim9.profileinteraction.config.domain.LoginEvent;
-import devops.tim9.profileinteraction.config.domain.UserEvent;
 import devops.tim9.profileinteraction.model.User;
 import devops.tim9.profileinteraction.security.Role;
 import devops.tim9.profileinteraction.security.UserTokenState;
 import devops.tim9.profileinteraction.security.VerificationToken;
 import devops.tim9.profileinteraction.service.UserService;
 import devops.tim9.profileinteraction.service.VerificationTokenService;
+import lombok.AllArgsConstructor;
 
 
 

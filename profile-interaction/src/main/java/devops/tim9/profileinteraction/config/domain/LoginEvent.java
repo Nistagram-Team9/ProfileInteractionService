@@ -1,7 +1,6 @@
 package devops.tim9.profileinteraction.config.domain;
 
 
-import devops.tim9.profileinteraction.config.JwtAuthenticationRequest;
 import devops.tim9.profileinteraction.config.JwtAuthenticationRequestToSend;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
