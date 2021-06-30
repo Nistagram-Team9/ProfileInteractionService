@@ -29,17 +29,17 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 
 @Service
 public class UserService implements UserDetailsService{
-	
+
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final ObjectMapper objectMapper;
-	
+
 	public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, ObjectMapper objectMapper) {
 		this.userRepository = userRepository;
 		this.passwordEncoder = passwordEncoder;
 		this.objectMapper = objectMapper;
 	}
-	
+
 	@KafkaListener(topics = {"user-events"})
 	public void onMessage(ConsumerRecord<Integer, String> consumerRecord) {
 		String value = consumerRecord.value();
@@ -50,84 +50,162 @@ public class UserService implements UserDetailsService{
 				this.create(user);
 			} else if (userEvent.getAction().equalsIgnoreCase("delete")) {
 				this.delete(user.getId());
-			} 
-			
+			}
+
 		} catch (JsonMappingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (JsonProcessingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}	
+		}
 
 	}
-	
+
 	public Boolean follow(Integer id) {
-			
+
+		System.out.println("Uslo u follow user");
 		User user = (User) userRepository
 				.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
 		User userToFollow = this.findById(id);
 		if (userToFollow.getIsPrivate() == true) {
+			System.out.println("User is private");
 			userToFollow.getFollowRequests().add(user);
+			userRepository.save(userToFollow);
+			userRepository.save(user);
 			return false;
 		}
+		System.out.println("User is public");
 		user.getFollowingUsers().add(userToFollow);
 		userToFollow.getFollowers().add(user);
+		userRepository.save(userToFollow);
+		userRepository.save(user);
 		return true;
 	}
-	
+
 	public void mute(Integer id) {
 		User user = (User) userRepository
 				.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
 		User userToMute = this.findById(id);
 		user.getMutedProfiles().add(userToMute);
-	
+		userRepository.save(user);
+
+
 	}
-	
+
 	public List<User> getFollowRequests(){
 		User user = (User) userRepository
 				.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
 		return user.getFollowRequests();
 	}
-	
+
+	public void acceptFollowRequest(Integer id){
+		User user = (User) userRepository
+				.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
+		User userToFollow = userRepository.findById(id).get();
+		userToFollow.getFollowers().add(user);
+		for (int i = 0; i < userToFollow.getFollowRequests().size(); i++) {
+			if (userToFollow.getFollowRequests().get(i).getId().equals(user.getId())) {
+				System.out.println("USLO U IFFFFFFF");
+				userToFollow.getFollowRequests().remove(i);
+
+			}
+		}
+		user.getFollowingUsers().add(userToFollow);
+		userRepository.save(userToFollow);
+		userRepository.save(user);
+	}
+
 	public void block(Integer id) {
 		User user = (User) userRepository
 				.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
 		User userToBlock = this.findById(id);
 		user.getBlockedProfiles().add(userToBlock);
-		userToBlock.getBlockedProfiles().add(user);
-		
+		userToBlock.getBlockedByProfiles().add(user);
+		userRepository.save(userToBlock);
+		userRepository.save(user);
+
 	}
-	
+
 	public void report(Integer id) {
 		User user = (User) userRepository
 				.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
 		User userToReport = this.findById(id);
 		user.getReportedProfiles().add(userToReport);
 		userToReport.getReportedByProfiles().add(user);
-		
+		userRepository.save(userToReport);
+		userRepository.save(user);
+
+
+
 	}
-	
+
 	public User search(String username) {
+		System.out.println("Search user");
 		User user = (User) userRepository
 				.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
 		User searchedUser = userRepository.findByUsername(username);
+		System.out.println(searchedUser);
 		if (searchedUser != null) {
+			System.out.println("User found");
 			if (searchedUser.getIsPrivate() == false) {
+				System.out.println("User is not private");
+				if (searchedUser.getBlockedByProfiles().contains(user) == true) {
+					System.out.println("1");
+					searchedUser.setBlocked(true);
+				}
+				if (user.getBlockedProfiles().contains(searchedUser) == true) {
+					System.out.println("2");
+					searchedUser.setIAmBlocked(true);
+				}
+				if (searchedUser.getFollowers().contains(user)) {
+					searchedUser.setFollowing(true);
+				}else {
+					searchedUser.setFollowing(false);
+				}
+
+				if (searchedUser.getReportedByProfiles().contains(user)) {
+					searchedUser.setReported(true);
+				}else {
+					searchedUser.setReported(false);
+				}
 				return searchedUser;
 			} else {
+				System.out.println("User is private");
 				if (searchedUser.getFollowers().contains(user)) {
+					System.out.println("user is followed");
+					if (searchedUser.getBlockedByProfiles().contains(user) == true) {
+						System.out.println("1");
+						searchedUser.setBlocked(true); //ja sam ga blokirala
+					}
+					if (user.getBlockedProfiles().contains(searchedUser) == true) {
+						System.out.println("2");
+						searchedUser.setIAmBlocked(true); //mene su blokirali
+					}
+					searchedUser.setFollowing(true);
+					if (searchedUser.getReportedByProfiles().contains(user)) {
+						searchedUser.setReported(true);
+					}else {
+						searchedUser.setReported(false);
+					}
 					return searchedUser;
 				} else {
-					return null;
+					System.out.println("user not followed");
+					searchedUser.setFollowing(false);
+					if (searchedUser.getReportedByProfiles().contains(user)) {
+						searchedUser.setReported(true);
+					}else {
+						searchedUser.setReported(false);
+					}
+					return searchedUser;
 				}
 			}
 		}
 		return searchedUser;
-		
-		
+
+
 	}
-	
+
 
 	public User findById(Integer id) {
 		return userRepository.findById(id).orElse(null);
@@ -148,7 +226,7 @@ public class UserService implements UserDetailsService{
 		this.create(user);
 		return user;
 	}
-	
+
 	public User registerAdmin(UserDto userDto) throws Exception {
 		if (this.usernameTaken(userDto.getUsername())) {
 			throw new IllegalArgumentException("Username is already taken.");
@@ -161,7 +239,7 @@ public class UserService implements UserDetailsService{
 		this.create(user);
 		return user;
 	}
-	
+
 	public User update(Integer id, UserDto userDto) {
 		User user = this.findById(id);
 		if (user != null) {
@@ -179,7 +257,7 @@ public class UserService implements UserDetailsService{
 			user.isActive = userDto.getIsActive();
 			user.setPassword(this.passwordEncoder.encode(userDto.getPassword()));
 			this.create(user);
-			
+
 		}
 		return user;
 	}
@@ -203,7 +281,7 @@ public class UserService implements UserDetailsService{
 		userRepository.delete(user.get());
 		return user.get();
 	}
-	
+
 	public User findUserByToken(String token) {
 		return userRepository.findByToken(token);
 	}

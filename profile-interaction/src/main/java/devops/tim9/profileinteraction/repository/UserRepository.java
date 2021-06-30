@@ -12,6 +12,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
 	@Query(value = "select * from users inner join verfication_tokens using (id)", nativeQuery = true)
 	User findByToken(String token);
-	
+
 
 }
