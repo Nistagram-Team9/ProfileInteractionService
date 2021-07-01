@@ -50,23 +50,23 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	protected void configure(HttpSecurity http) throws Exception {
 
 		http
-			// communication between client and server is stateless
-			.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-			.authorizeRequests()
-			.antMatchers("/auth/login").permitAll()
-			.antMatchers("/auth/registerAdmin").permitAll()
-			.antMatchers("/users/**").permitAll()
+				// communication between client and server is stateless
+				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+				.authorizeRequests()
+				.antMatchers("/auth/login").permitAll()
+				.antMatchers("/auth/registerAdmin").permitAll()
+				.antMatchers("/users/**").permitAll()
 
 				//antMatchers("/auth/registerLibrarian").permitAll()
-			//.antMatchers("/books/**").permitAll()
-			//.antMatchers("/bookCopies/**").permitAll()
-			//.antMatchers("/users/**").permitAll()
-			//.antMatchers("/bookRent/**").permitAll()
-			// every request needs to be authorized
-			.anyRequest().authenticated().and()
-			// add filter before every request
-			.addFilterBefore(new TokenAuthenticationFilter(tokenHelper, userService),
-				BasicAuthenticationFilter.class);
+				//.antMatchers("/books/**").permitAll()
+				//.antMatchers("/bookCopies/**").permitAll()
+				//.antMatchers("/users/**").permitAll()
+				//.antMatchers("/bookRent/**").permitAll()
+				// every request needs to be authorized
+				.anyRequest().authenticated().and()
+				// add filter before every request
+				.addFilterBefore(new TokenAuthenticationFilter(tokenHelper, userService),
+						BasicAuthenticationFilter.class);
 		http.csrf().disable();
 
 	}
@@ -75,11 +75,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		// Token Filter will ignore these paths
 		web.ignoring().antMatchers(HttpMethod.POST, "/auth/login", "/h2/**");
 		web.ignoring().antMatchers(HttpMethod.GET, "/", "/login", "/h2/**", "/webjars/**", "/*.html", "/favicon.ico",
-			"/**/*.html", "/**/*.css", "/**/*.js");
+				"/**/*.html", "/**/*.css", "/**/*.js");
 
-		
+
 	}
-	
+
 
 
 	public UserTokenState login(JwtAuthenticationRequestToSend authenticationRequestToSend) throws Exception {
@@ -95,21 +95,18 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 //		String jwt = tokenHelper.generateToken(user.getUsername());
 		int expiresIn = tokenHelper.getExpiredIn();
 		Role role = null;
-		if (user.getAuthoitiesList().get(0).getRole().equals(Role.ROLE_ADMIN)) {
+		if (user.getAuthoritiesList().get(0).getRole().equals(Role.ROLE_ADMIN)) {
 			role = Role.ROLE_ADMIN;
 		} else {
 			role = Role.ROLE_USER;
 		}
-		
+
 		VerificationToken verificationToken = new VerificationToken();
 		String jwt = authenticationRequestToSend.getToken();
 		verificationToken.setToken(jwt);
 		verificationToken.setUser(user);
 		verificationTokenService.saveToken(verificationToken);
-		System.out.println("TOKEEN");
-		System.out.println(verificationTokenService.findByToken(jwt).getToken());;
-//		System.out.println(userService.findUserByToken(jwt).getUsername());
-		
+
 		return new UserTokenState(jwt, expiresIn, role);
 	}
 
@@ -122,21 +119,15 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		userService.create(user);
 		return user;
 	}
-	
+
 
 	@KafkaListener(topics = {"login-events"})
 	public void onMessage(ConsumerRecord<Integer, String> consumerRecord) {
-		System.out.println("Consumer record accepted: " + consumerRecord);
-		System.out.println(consumerRecord);
-		
+
 		String value = consumerRecord.value();
 		try {
 			LoginEvent loginEvent = objectMapper.readValue(value, LoginEvent.class);
-			System.out.println("login event");
-			System.out.println(loginEvent.toString());
 			JwtAuthenticationRequestToSend request = loginEvent.getAuthenticationRequest();
-			System.out.println("tokennnnn");
-			System.out.println(loginEvent.getAuthenticationRequest());
 			try {
 				this.login(request);
 			} catch (Exception e) {
@@ -149,7 +140,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		} catch (JsonProcessingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}	
+		}
 
 	}
 

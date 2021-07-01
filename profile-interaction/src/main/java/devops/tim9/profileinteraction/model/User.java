@@ -31,11 +31,11 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class User implements UserDetails{
-	
+
 	@Id
 	@GeneratedValue
 	private Integer id;
-	
+
 	public String name;
 	public String surname;
 	public String email;
@@ -49,38 +49,56 @@ public class User implements UserDetails{
 	public Boolean canBeTagged;
 	public Boolean isActive;
 	public String password;
-	
+
 	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	@JoinTable(name = "user_authority", joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "authority_id", referencedColumnName = "id"))
 	@JsonIgnore
 	private List<Authority> authorities = new ArrayList<>();
-	
-	@OneToMany
-	private List<User> followingUsers;
-	
-	@OneToMany
-	private List<User> followers;
-	
-	
-	@OneToMany
-	private List<User> followRequests;
-	
 
 	@OneToMany
+	@JsonIgnore
+	private List<User> followingUsers;
+
+	@OneToMany
+	@JsonIgnore
+	private List<User> followers;
+
+
+	@OneToMany
+	@JsonIgnore
+	private List<User> followRequests;
+
+
+	@OneToMany
+	@JsonIgnore
 	private List<User> mutedProfiles;
-	
+
 	@OneToMany
+	@JsonIgnore
 	private List<User> blockedProfiles;
-	
+
 	@OneToMany
+	@JsonIgnore
 	private List<User> blockedByProfiles;
-	
+
 	@OneToMany
+	@JsonIgnore
 	private List<User> reportedProfiles;
-	
+
 	@OneToMany
+	@JsonIgnore
 	private List<User> reportedByProfiles;
-	
+
+	private Boolean iAmBlocked;
+
+	private Boolean blocked;
+
+	private Boolean following;
+
+	private Boolean reported;
+
+
+
 	public User(UserDto userDto) {
 		this.name = userDto.getName();
 		this.surname = userDto.getSurname();
@@ -94,16 +112,17 @@ public class User implements UserDetails{
 		this.isPrivate = userDto.getIsPrivate();
 		this.canBeTagged = userDto.getCanBeTagged();
 		this.isActive = userDto.getIsActive();
-		
+
+
 	}
-	
-	
+
+
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		return this.authorities;
 	}
 
-	public List<Authority> getAuthoitiesList(){
+	public List<Authority> getAuthoritiesList(){
 		return  authorities;
 	}
 	@JsonIgnore

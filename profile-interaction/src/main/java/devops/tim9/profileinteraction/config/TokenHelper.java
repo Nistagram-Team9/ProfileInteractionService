@@ -55,7 +55,7 @@ public class TokenHelper {
 				claims.setIssuedAt(java.sql.Date.valueOf(LocalDate.now()));
 			}
 			refreshedToken = Jwts.builder().setClaims(claims).setExpiration(generateExpirationDate())
-				.signWith(SIGNATURE_ALGORITHM, SECRET).compact();
+					.signWith(SIGNATURE_ALGORITHM, SECRET).compact();
 		} catch (Exception e) {
 			refreshedToken = null;
 		}
@@ -65,7 +65,7 @@ public class TokenHelper {
 	public Boolean canTokenBeRefreshed(String token, Date lastPasswordReset) {
 		final Date created = this.getIssuedAtDateFromToken(token);
 		return !(this.isCreatedBeforeLastPasswordReset(created, lastPasswordReset))
-			&& (!(this.isTokenExpired(token)));
+				&& (!(this.isTokenExpired(token)));
 	}
 
 	// Functions for validating JWT token data
