@@ -17,9 +17,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import devops.tim9.profileinteraction.config.domain.FollowEvent;
 import devops.tim9.profileinteraction.config.domain.UserEvent;
 import devops.tim9.profileinteraction.dto.UserDto;
 import devops.tim9.profileinteraction.model.User;
+import devops.tim9.profileinteraction.producer.FollowEventProducer;
 import devops.tim9.profileinteraction.repository.UserRepository;
 import devops.tim9.profileinteraction.security.Authority;
 import devops.tim9.profileinteraction.security.Role;
@@ -33,6 +35,9 @@ public class UserService implements UserDetailsService{
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final ObjectMapper objectMapper;
+	
+	@Autowired
+	FollowEventProducer followEventProducer;
 
 	public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, ObjectMapper objectMapper) {
 		this.userRepository = userRepository;
@@ -80,6 +85,13 @@ public class UserService implements UserDetailsService{
 		userToFollow.getFollowers().add(user);
 		userRepository.save(userToFollow);
 		userRepository.save(user);
+		FollowEvent followEvent = new FollowEvent(null, userToFollow.getUsername(), user.getUsername());
+		try {
+			followEventProducer.sendFollowEvent(followEvent);
+		} catch (JsonProcessingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return true;
 	}
 
@@ -106,7 +118,6 @@ public class UserService implements UserDetailsService{
 		userToFollow.getFollowers().add(user);
 		for (int i = 0; i < userToFollow.getFollowRequests().size(); i++) {
 			if (userToFollow.getFollowRequests().get(i).getId().equals(user.getId())) {
-				System.out.println("USLO U IFFFFFFF");
 				userToFollow.getFollowRequests().remove(i);
 
 			}
@@ -114,6 +125,13 @@ public class UserService implements UserDetailsService{
 		user.getFollowingUsers().add(userToFollow);
 		userRepository.save(userToFollow);
 		userRepository.save(user);
+		FollowEvent followEvent = new FollowEvent(null, userToFollow.getUsername(), user.getUsername());
+		try {
+			followEventProducer.sendFollowEvent(followEvent);
+		} catch (JsonProcessingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public void block(Integer id) {
