@@ -55,37 +55,37 @@ public class User implements UserDetails{
 	@JsonIgnore
 	private List<Authority> authorities = new ArrayList<>();
 
-	@OneToMany
+	@ManyToMany
 	@JsonIgnore
 	private List<User> followingUsers;
 
-	@OneToMany
+	@ManyToMany
 	@JsonIgnore
 	private List<User> followers;
 
 
-	@OneToMany
+	@ManyToMany
 	@JsonIgnore
 	private List<User> followRequests;
 
 
-	@OneToMany
+	@ManyToMany
 	@JsonIgnore
 	private List<User> mutedProfiles;
 
-	@OneToMany
+	@ManyToMany
 	@JsonIgnore
 	private List<User> blockedProfiles;
 
-	@OneToMany
+	@ManyToMany
 	@JsonIgnore
 	private List<User> blockedByProfiles;
 
-	@OneToMany
+	@ManyToMany
 	@JsonIgnore
 	private List<User> reportedProfiles;
 
-	@OneToMany
+	@ManyToMany
 	@JsonIgnore
 	private List<User> reportedByProfiles;
 
