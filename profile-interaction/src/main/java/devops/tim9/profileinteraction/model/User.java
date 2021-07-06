@@ -14,6 +14,8 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -57,36 +59,44 @@ public class User implements UserDetails{
 
 	@ManyToMany
 	@JsonIgnore
+	@LazyCollection(LazyCollectionOption.FALSE)
 	private List<User> followingUsers;
 
 	@ManyToMany
 	@JsonIgnore
+	@LazyCollection(LazyCollectionOption.FALSE)
 	private List<User> followers;
 
 
 	@ManyToMany
 	@JsonIgnore
+	@LazyCollection(LazyCollectionOption.FALSE)
 	private List<User> followRequests;
 
 
 	@ManyToMany
 	@JsonIgnore
+	@LazyCollection(LazyCollectionOption.FALSE)
 	private List<User> mutedProfiles;
 
 	@ManyToMany
 	@JsonIgnore
+	@LazyCollection(LazyCollectionOption.FALSE)
 	private List<User> blockedProfiles;
 
 	@ManyToMany
 	@JsonIgnore
+	@LazyCollection(LazyCollectionOption.FALSE)
 	private List<User> blockedByProfiles;
 
 	@ManyToMany
 	@JsonIgnore
+	@LazyCollection(LazyCollectionOption.FALSE)
 	private List<User> reportedProfiles;
 
 	@ManyToMany
 	@JsonIgnore
+	@LazyCollection(LazyCollectionOption.FALSE)
 	private List<User> reportedByProfiles;
 
 	private Boolean iAmBlocked;
