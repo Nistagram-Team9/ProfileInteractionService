@@ -22,6 +22,7 @@ import devops.tim9.profileinteraction.config.domain.UserEvent;
 import devops.tim9.profileinteraction.dto.UserDto;
 import devops.tim9.profileinteraction.model.User;
 import devops.tim9.profileinteraction.producer.FollowEventProducer;
+import devops.tim9.profileinteraction.repository.AuthorityRepository;
 import devops.tim9.profileinteraction.repository.UserRepository;
 import devops.tim9.profileinteraction.security.Authority;
 import devops.tim9.profileinteraction.security.Role;
@@ -35,14 +36,17 @@ public class UserService implements UserDetailsService{
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final ObjectMapper objectMapper;
+	private final AuthorityRepository authorityRepository;
+
 	
 	@Autowired
 	FollowEventProducer followEventProducer;
 
-	public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, ObjectMapper objectMapper) {
+	public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, ObjectMapper objectMapper, AuthorityRepository authorityRepository) {
 		this.userRepository = userRepository;
 		this.passwordEncoder = passwordEncoder;
 		this.objectMapper = objectMapper;
+		this.authorityRepository = authorityRepository;
 	}
 
 	@KafkaListener(topics = {"user-events"})
@@ -52,6 +56,15 @@ public class UserService implements UserDetailsService{
 			UserEvent userEvent = objectMapper.readValue(value, UserEvent.class);
 			User user = userEvent.getUser();
 			if (userEvent.getAction().equalsIgnoreCase("registerUser") || userEvent.getAction().equalsIgnoreCase("registerAdmin") || userEvent.getAction().equalsIgnoreCase("update")) {
+				List<Authority> authorities = new ArrayList<>();
+				if (userEvent.getAction().equalsIgnoreCase("registerUser")) {
+					authorities.add(new Authority(Role.ROLE_USER));
+
+				} else {
+					authorities.add(new Authority(Role.ROLE_ADMIN));
+
+				}
+				user.setAuthorities(authorities);
 				this.create(user);
 			} else if (userEvent.getAction().equalsIgnoreCase("delete")) {
 				this.delete(user.getId());
@@ -239,9 +252,11 @@ public class UserService implements UserDetailsService{
 		user.setPassword(this.passwordEncoder.encode(userDto.getPassword()));
 		System.out.println(user.getPassword());
 		List<Authority> authorities = new ArrayList<>();
-		authorities.add(new Authority(Role.ROLE_USER));
+		Authority authority = new Authority(Role.ROLE_USER);
+		authorities.add(authority);
 		user.setAuthorities(authorities);
 		this.create(user);
+		this.authorityRepository.save(authority);
 		return user;
 	}
 
@@ -252,9 +267,11 @@ public class UserService implements UserDetailsService{
 		User user = new User(userDto);
 		user.setPassword(this.passwordEncoder.encode(userDto.getPassword()));
 		List<Authority> authorities = new ArrayList<>();
-		authorities.add(new Authority(Role.ROLE_ADMIN));
+		Authority authority = new Authority(Role.ROLE_ADMIN);
+		authorities.add(authority);
 		user.setAuthorities(authorities);
 		this.create(user);
+		this.authorityRepository.save(authority);
 		return user;
 	}
 
