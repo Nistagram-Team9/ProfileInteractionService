@@ -109,6 +109,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 			role = Role.ROLE_USER;
 		}
 
+//		Role role = Role.ROLE_USER;
 		VerificationToken verificationToken = new VerificationToken();
 		String jwt = authenticationRequestToSend.getToken();
 		verificationToken.setToken(jwt);
